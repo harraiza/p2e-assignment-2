@@ -1,0 +1,24 @@
+def login():
+    userdict={"hamza":"password"}
+    while True:
+        username=input("enter username")
+        password=input("enter password")
+        if username=="admin" and password=="1234":
+            print("login successful")
+        elif username in userdict and password == userdict[username]:
+            print("login successful")
+        else:
+            print("login failed")
+def signup():
+    userdict={"hamza":"password"}
+    while True:
+        username=input("enter username")
+        password=input("enter password")
+        if username not in userdict:
+            userdict[username]=password
+            print("sign up successful")
+            break
+        if username=="break":
+            break
+        else:
+            print("username taken")
