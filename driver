@@ -14,11 +14,42 @@ def signup():
     while True:
         username=input("enter username")
         password=input("enter password")
-        if username not in userdict:
+        conf_password=input("confirm password")
+        conf_question=input("enter confirmation question")
+        conf_answer=input("enter confirmation answer")
+        if username not in userdict and conf_password==password:
             userdict[username]=password
             print("sign up successful")
             break
         if username=="break":
             break
         else:
-            print("username taken")
+            print("username taken or password incorrect")
+class User:
+    def __init__(self,username,password,conf_question,conf_answer):
+        self.username=username
+        self.password=password
+        self.conf_question=conf_question
+        self.conf_answer=conf_answer
+    def display_shows(self):
+        pass
+class Admin(User):
+    def __init__(self, username, password, conf_question, conf_answer):
+        super().__init__(username, password, conf_question, conf_answer)
+    def display_shows(self):
+        return super().display_shows()
+    def add_show(self):
+        pass
+    def remove_show(self):
+        pass
+    def add_screen(self):
+        pass
+    def remove_screen(self):
+        pass
+class Customer(User):
+    def __init__(self, username, password, conf_question, conf_answer):
+        super().__init__(username, password, conf_question, conf_answer)
+    def book_show(self):
+        pass
+    def display_booking(self):
+        pass
