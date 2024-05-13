@@ -1,30 +1,56 @@
-def login():
-    userdict={"hamza":"password"}
+import pickle
+def login(users):
     while True:
-        username=input("enter username")
-        password=input("enter password")
-        if username=="admin" and password=="1234":
-            print("login successful")
-        elif username in userdict and password == userdict[username]:
-            print("login successful")
-        else:
-            print("login failed")
-def signup():
-    userdict={"hamza":"password"}
+        username = input("Enter username: ")
+        password = input("Enter password: ")
+        for user in users:
+            if user.username == username and user.password == password:
+                print("Login successful")
+                return user
+        print("Login failed")
+
+def signup(users):
     while True:
-        username=input("enter username")
-        password=input("enter password")
-        conf_password=input("confirm password")
-        conf_question=input("enter confirmation question")
-        conf_answer=input("enter confirmation answer")
-        if username not in userdict and conf_password==password:
-            userdict[username]=password
-            print("sign up successful")
-            break
-        if username=="break":
-            break
-        else:
-            print("username taken or password incorrect")
+        username = input("Enter username: ")
+        if any(user.username == username for user in users):
+            print("Username already exists. Try another one.")
+            continue
+        password = input("Enter password: ")
+        conf_password = input("Confirm password: ")
+        conf_question = input("Enter confirmation question: ")
+        conf_answer = input("Enter confirmation answer: ")
+        if conf_password != password:
+            print("Passwords do not match. Try again.")
+            continue
+        new_user = User(username, password, conf_question, conf_answer)
+        users.append(new_user)
+        save_users(users)  # Save users after signing up
+        print("Sign up successful")
+        break
+
+def save_users(users):
+    with open("users.txt", "wb") as f:
+        pickle.dump(users, f)
+
+def load_users():
+    try:
+        with open("users.txt", "rb") as f:
+            return pickle.load(f)
+    except FileNotFoundError:
+        return []
+
+def forgot_password(users):
+    username=input("Enter username: ")
+    for user in users:
+            if user.username == username:
+                break
+    print(user.conf_question)
+    answer=input("Enter answer: ")
+    if answer==user.conf_answer:
+        print("Your password is: ",user.password)
+    else:
+        print("Wrong answer")
+
 class User:
     def __init__(self,username,password,conf_question,conf_answer):
         self.username=username
@@ -53,3 +79,35 @@ class Customer(User):
         pass
     def display_booking(self):
         pass
+class Movie:
+    def __init__(self,title):
+        self.title=title #str
+class Timeslot:
+    def __init__(self,starting_time,ending_time,date):
+        self.starting_time=starting_time #str in 2400
+        self.ending_time=ending_time #str in 2400 format
+        self.date=date #str in dd/mm/yy
+class Screen:
+    def __init__(self,screen_id,seats):
+        self.screen_id=screen_id #integer
+        self.seats=seats #nested list
+        self.shows={}
+    def add_show(self,title,starting_time,ending_time,date):
+        self.shows[Timeslot(starting_time,ending_time,date)]=Movie(title)
+
+
+if __name__ == "__main__":
+    users = load_users()
+    while True:
+        choice = input("Choose an option: 1 - Login, 2 - Sign Up, 3 - Forgot password: ")
+        if choice == "1":
+            logged_in_user = login(users)
+            # Perform actions for logged in user
+            print(logged_in_user)
+        elif choice == "2":
+            signup(users)
+        elif choice == "3":
+            forgot_password(users)
+        elif choice == "4":
+            print("Closing program")
+            break
