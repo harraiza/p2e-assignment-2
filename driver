@@ -1,4 +1,5 @@
 import pickle
+
 def login(users):
     while True:
         username = input("Enter username: ")
@@ -6,6 +7,9 @@ def login(users):
         for user in users:
             if user.username == username and user.password == password:
                 print("Login successful")
+                if user.username== "admin":
+                    admin=Admin(username,password,user.conf_question,user.conf_answer)
+                    return admin
                 return user
         print("Login failed")
 
@@ -51,14 +55,32 @@ def forgot_password(users):
     else:
         print("Wrong answer")
 
+def load_screens():
+    try:
+        with open("screens.txt", "rb") as f:
+            return pickle.load(f)
+    except FileNotFoundError:
+        return []
+
 class User:
     def __init__(self,username,password,conf_question,conf_answer):
         self.username=username
         self.password=password
         self.conf_question=conf_question
         self.conf_answer=conf_answer
+
     def display_shows(self):
+        screens=load_screens()
+        show_dict={}
+        for screen in screens:
+            show_dict[screen.id]=screen.shows
+        print (show_dict)
+
+    def book_show(self):
         pass
+    def display_booking(self):
+        pass
+
 class Admin(User):
     def __init__(self, username, password, conf_question, conf_answer):
         super().__init__(username, password, conf_question, conf_answer)
@@ -71,13 +93,6 @@ class Admin(User):
     def add_screen(self):
         pass
     def remove_screen(self):
-        pass
-class Customer(User):
-    def __init__(self, username, password, conf_question, conf_answer):
-        super().__init__(username, password, conf_question, conf_answer)
-    def book_show(self):
-        pass
-    def display_booking(self):
         pass
 class Movie:
     def __init__(self,title):
@@ -102,8 +117,10 @@ if __name__ == "__main__":
         choice = input("Choose an option: 1 - Login, 2 - Sign Up, 3 - Forgot password: ")
         if choice == "1":
             logged_in_user = login(users)
-            # Perform actions for logged in user
-            print(logged_in_user)
+            logged_in_user.display_shows()
+            if logged_in_user.username=="admin":
+                logged_in_user.add_show()
+            break
         elif choice == "2":
             signup(users)
         elif choice == "3":
