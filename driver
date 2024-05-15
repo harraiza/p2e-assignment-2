@@ -113,25 +113,26 @@ class User:
         for screen in screens:
             if screen_id == screen.screen_id and seat_id in screen.seats:
                 for show in screen.shows:
-                    if show.starting_time == starting_time and show.date == date and screen.shows[show].title == movie_title:
+                    if (
+                        show.starting_time == starting_time
+                        and show.date == date
+                        and screen.shows[show].title == movie_title
+                    ):
+                        booking = Booking(screen_id, movie_title, seat_id, starting_time, date)
                         for user in users:
-                            for other_booking in user.bookings:
-                                if Booking(screen_id, movie_title, seat_id, starting_time, date).booking_id == other_booking.booking_id:
-                                    print("Booking already exists")
-                                    break
-                            else:
-                                self.bookings.append(Booking(screen_id, movie_title, seat_id, starting_time, date))
-                                print("Seat booked successfully with id:", self.bookings[-1].booking_id)
+                            if booking in user.bookings:
+                                print("Booking already exists")
                                 break
                         else:
-                            print("Booking already exists")
-                            break
+                            self.bookings.append(booking)
+                            print("Seat booked successfully with id:", booking.booking_id)
+                        break 
                 else:
                     print("Show not found")
-                    break
                 break
         else:
             print("Screen not found")
+
         save_users(users)
 
     def display_booking(self):
