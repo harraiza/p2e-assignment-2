@@ -1,6 +1,6 @@
 import pickle
 
-def login(users):
+def login(users): #function returns instance of admin or user depending upon the given data and takes list of instances of user to varify credentials
     while True:
         username = input("Enter username: ")
         password = input("Enter password: ")
@@ -12,7 +12,7 @@ def login(users):
                 return user
         print("Login failed")
 
-def signup(users):
+def signup(users): #creates an instance of user and saves it in the user instances list file
     while True:
         username = input("Enter username: ")
         if any(user.username == username for user in users):
@@ -31,7 +31,7 @@ def signup(users):
         print("Sign up successful")
         break
 
-def load_users():
+def load_users(): #returns user instance list file if it exists via unpickling and try except
     try:
         with open("user/users.txt", "rb") as f:
             users = pickle.load(f)
@@ -39,7 +39,7 @@ def load_users():
     except FileNotFoundError:
         return []
 
-def load_screens():
+def load_screens(): #returns screen instance list file if it exists via unpickling and try except 
     try:
         with open("screen/screens.txt", "rb") as f:
             screens = pickle.load(f)
@@ -47,21 +47,21 @@ def load_screens():
     except FileNotFoundError:
         return []
 
-def save_users(users):
+def save_users(users): #dumps the list of instances loaded into user instance list file
     try:
         with open("user/users.txt", "wb") as f:
             pickle.dump(users, f)
     except Exception as e:
         print("Error saving users:", e)
 
-def save_screens(screens):
+def save_screens(screens): #dumps the list of instances loaded into screens instance list file
     try:
         with open("screen/screens.txt", "wb") as f:
             pickle.dump(screens, f)
     except Exception as e:
         print("Error saving screens:", e)
 
-def forgot_password(users):
+def forgot_password(users): #prints the password of a user via verification Q/a method
     username=input("Enter username: ")
     for user in users:
             if user.username == username:
@@ -73,7 +73,7 @@ def forgot_password(users):
     else:
         print("Wrong answer")
 
-class User:
+class User: #class user defined with its attributes
     def __init__(self,username,password,conf_question,conf_answer):
         self.username=username
         self.password=password
@@ -81,7 +81,7 @@ class User:
         self.conf_answer=conf_answer
         self.bookings=[]
 
-    def display_shows(self):
+    def display_shows(self): #creates a dictionary of shows where the key is the screen id and the value is the list of shows present with in that screen and prints them out in a readable manner
         screens=load_screens()
         show_dict={}
         for screen in screens:
@@ -101,7 +101,7 @@ class User:
                 print("Seat IDs:", show['seat ids'])
                 print() 
 
-    def book_show(self):
+    def book_show(self): #creates a new entry of an instance of booking created with complete verification in bookings list 
         users = load_users()
         screens = load_screens()
         screen_id = input("Enter screen id: ")
@@ -137,7 +137,7 @@ class User:
         users.append(self)
         save_users(users)
 
-    def display_booking(self):
+    def display_booking(self): #prints the dict dunder function of each booking from the list of bookings
         if not self.bookings:
             print("No bookings found.")
             return
@@ -145,7 +145,7 @@ class User:
         for booking in self.bookings:
             print(booking.__dict__)
 
-    def remove_booking(self):
+    def remove_booking(self): #removes the booking from the booking list of user by checking its unique booking id
         users=load_users()
         booking_id=input("Enter booking ID: ")
         for booking in self.bookings:
@@ -156,21 +156,21 @@ class User:
                 self.bookings.remove(booking)
         users.append(self)
         save_users(users)
-class Admin(User):
+class Admin(User): #admin inherits all attributes from parent user class except booking list
     def __init__(self, username, password, conf_question, conf_answer):
         super().__init__(username, password, conf_question, conf_answer)
 
-    def display_shows(self):
+    def display_shows(self): #dispays show by inheriting method from the parent class user
         return super().display_shows()
-
-    def display_screens(self):
+ 
+    def display_screens(self): #displays the list of screens with their complete attributes
         screens=load_screens()
         for screen in screens:
             print(screen.screen_id)
             print(screen.seats)
             print(screen.shows)
 
-    def add_show(self):
+    def add_show(self): #adds show to the list of shows present within a screen via screen class method add show
         screens=load_screens()
         screen_id=input("enter screen id: ")
         for screen in screens:
@@ -187,7 +187,7 @@ class Admin(User):
         save_screens(screens)
         print("Show added successfully.")
 
-    def remove_show(self):
+    def remove_show(self): #removes the show from the list of shows present within a screen by creating a new instance and comparing its dict dunder with the instances present within the show list
         screens = load_screens()
         screen_id = input("Enter screen id: ")
         title = input("Enter movie title: ")
@@ -207,7 +207,7 @@ class Admin(User):
                         break
         save_screens(screens)
 
-    def add_screen(self):
+    def add_screen(self): #creates new instance of screen and adds it to the screen instance list file
         while True:
             screens=load_screens()
             screen_id = input("Enter screen id: ")
@@ -223,34 +223,34 @@ class Admin(User):
         print("screen addition successful")
         return screens    
     
-    def remove_screen(self):
+    def remove_screen(self): #removes screen instance by id comparison
         screens=load_screens()
         screen_id=input("enter screen id: ")
         for screen in screens:
             if screen.screen_id==screen_id:
                 screens.remove(screen)
         save_screens(screens)
-class Movie:
+class Movie:    #class defined for movie with attribute title
     def __init__(self,title):
         self.title=title
-    def __repr__(self):
+    def __repr__(self): #repr dunder return the dict dunder as a string
         return str(self.__dict__)
-class Timeslot:
+class Timeslot: #class defined for timeslot with attributes date and starting and ending times
     def __init__(self,starting_time,ending_time,date):
         self.starting_time=starting_time
         self.ending_time=ending_time
         self.date=date
-    def __repr__(self):
+    def __repr__(self): #repr dunder return the dict dunder as a string
         return str(self.__dict__)
-class Screen:
+class Screen: #screen class defined with seat list, an empty show dict and a screen id
     def __init__(self,screen_id,seats):
         self.screen_id=screen_id 
         self.seats=seats
         self.shows={}
-    def add_show(self,title,starting_time,ending_time,date):
+    def add_show(self,title,starting_time,ending_time,date): #creates new entry in show dict for movie instance at timeslot instance
         self.shows[Timeslot(starting_time,ending_time,date)]=Movie(title)
 
-class Booking:
+class Booking: #booking class defined with only the necesissary attributes for ease of use
     def __init__(self,screen_id,movie_title,seat_id,starting_time,date):
         self.booking_id=screen_id+date+starting_time
         self.screen_id=screen_id
@@ -259,12 +259,12 @@ class Booking:
         self.starting_time=starting_time
         self.date=date
 
-    def __eq__(self, other):
+    def __eq__(self, other): #eq dunder defined for in function
         if isinstance(other,Booking):
             return self.screen_id==other.screen_id and self.movie_title==other.movie_title and self.seat_id==other.seat_id and self.starting_time==other.starting_time and self.date==other.date
         
 
-def admin_menu(admin):
+def admin_menu(admin): #admin ui defined
     while True:
         print("Admin Menu:")
         print("1 - Display Screens")
@@ -293,7 +293,7 @@ def admin_menu(admin):
         else:
             print("Invalid choice. Please try again.")
 
-def user_menu(user):
+def user_menu(user): #user ui defined
     while True:
         print("User Menu:")
         print("1 - Display Shows")
@@ -316,7 +316,7 @@ def user_menu(user):
         else:
             print("Invalid choice. Please try again.")
 
-if __name__ == "__main__":
+if __name__ == "__main__": #driver code
     users = load_users()
     screens = load_screens()
     while True:
