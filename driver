@@ -165,8 +165,6 @@ class Admin(User):
 
     def display_screens(self):
         screens=load_screens()
-        if len(screens)==0:
-            print("No screens found.")
         for screen in screens:
             print(screen.screen_id)
             print(screen.seats)
@@ -184,28 +182,29 @@ class Admin(User):
                 for screen in screens:
                     if screen.__dict__ == self.__dict__:
                         screens.remove(screen)
-                screen.add_show(title,starting_time,ending_time,date)
-        screens.append(screen)
+                        break
+        screen.add_show(title,starting_time,ending_time,date)
         save_screens(screens)
+        print("Show added successfully.")
 
     def remove_show(self):
-        screens=load_screens()
-        screen_id=input("enter screen id: ")
+        screens = load_screens()
+        screen_id = input("Enter screen id: ")
+        title = input("Enter movie title: ")
+        starting_time = input("Enter starting time: ")
+        ending_time=input("Enter ending time: ")
+        date = input("Enter date: ")
+        timeslot1=Timeslot(starting_time,ending_time,date)
+        movie1=Movie(title)
         for screen in screens:
             if screen.screen_id==screen_id:
-                title=input("enter movie title: ")
-                starting_time=input("enter starting time: ")
-                ending_time=input("enter ending time: ")
-                date=input("enter date: ")
-                timeslot=Timeslot(starting_time,ending_time,date)
-                movie=Movie(title)
-                for screen in screens:
-                    if screen.__dict__ == self.__dict__:
+                for timeslot,movie in screen.shows.items():
+                    if timeslot.__dict__== timeslot1.__dict__ and movie.__dict__==movie1.__dict__:
                         screens.remove(screen)
-                        for time,film in screen.shows.items():
-                            if time.__dict__==timeslot.dict and film.__dict__==movie.__dict__:
-                                screen.shows.pop(time)    
-        screens.append(screen)
+                        screen.shows.pop(timeslot)
+                        screens.append(screen)
+                        print("Show removed successfully")
+                        break
         save_screens(screens)
 
     def add_screen(self):
@@ -220,10 +219,10 @@ class Admin(User):
             new_screen = Screen(screen_id,seats)
             break
         screens.append(new_screen)
-        save_screens(screens)  
+        save_screens(screens)
         print("screen addition successful")
-            
-
+        return screens    
+    
     def remove_screen(self):
         screens=load_screens()
         screen_id=input("enter screen id: ")
@@ -337,7 +336,5 @@ if __name__ == "__main__":
         elif choice == "3":
             forgot_password(users)
         elif choice == "4":
-            save_users(users)
-            save_screens(screens)
             print("Exiting program")
             break
