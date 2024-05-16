@@ -1,5 +1,5 @@
 import pickle
-import random
+
 def login(users):
     while True:
         username = input("Enter username: ")
@@ -51,7 +51,6 @@ def save_users(users):
     try:
         with open("user/users.txt", "wb") as f:
             pickle.dump(users, f)
-            print("Users saved successfully.")
     except Exception as e:
         print("Error saving users:", e)
 
@@ -96,10 +95,10 @@ class User:
         for screen_id, shows in show_dict.items():
             print(f"Screen ID: {screen_id}")
             for show in shows:
-                print(f"Movie: {show['movie']}")
-                print(f"Date: {show['date']}")
-                print(f"Starting Time: {show['starting_time']}")
-                print(f"Seat IDs: {show['seat ids']}")
+                print("Movie:",show['movie'])
+                print("Date:",show['date'])
+                print("Starting Time:", show['starting_time'])
+                print("Seat IDs:", show['seat ids'])
                 print() 
 
     def book_show(self):
@@ -124,6 +123,9 @@ class User:
                                 print("Booking already exists")
                                 break
                         else:
+                            for user in users:
+                                if user.__dict__ == self.__dict__:
+                                    users.remove(user)
                             self.bookings.append(booking)
                             print("Seat booked successfully with id:", booking.booking_id)
                         break 
@@ -132,7 +134,7 @@ class User:
                 break
         else:
             print("Screen not found")
-
+        users.append(self)
         save_users(users)
 
     def display_booking(self):
@@ -142,6 +144,18 @@ class User:
         print("Bookings:")
         for booking in self.bookings:
             print(booking.__dict__)
+
+    def remove_booking(self):
+        users=load_users()
+        booking_id=input("Enter booking ID: ")
+        for booking in self.bookings:
+            if booking.booking_id==booking_id:
+                for user in users:
+                    if user.__dict__ == self.__dict__:
+                        users.remove(user)
+                self.bookings.remove(booking)
+        users.append(self)
+        save_users(users)
 class Admin(User):
     def __init__(self, username, password, conf_question, conf_answer):
         super().__init__(username, password, conf_question, conf_answer)
@@ -152,7 +166,7 @@ class Admin(User):
     def display_screens(self):
         screens=load_screens()
         if len(screens)==0:
-            print("no screens")
+            print("No screens found.")
         for screen in screens:
             print(screen.screen_id)
             print(screen.seats)
@@ -167,11 +181,32 @@ class Admin(User):
                 starting_time=input("enter starting time: ")
                 ending_time=input("enter ending time: ")
                 date=input("enter date: ")
+                for screen in screens:
+                    if screen.__dict__ == self.__dict__:
+                        screens.remove(screen)
                 screen.add_show(title,starting_time,ending_time,date)
-                save_screens(screens)
+        screens.append(screen)
+        save_screens(screens)
 
     def remove_show(self):
-        pass
+        screens=load_screens()
+        screen_id=input("enter screen id: ")
+        for screen in screens:
+            if screen.screen_id==screen_id:
+                title=input("enter movie title: ")
+                starting_time=input("enter starting time: ")
+                ending_time=input("enter ending time: ")
+                date=input("enter date: ")
+                timeslot=Timeslot(starting_time,ending_time,date)
+                movie=Movie(title)
+                for screen in screens:
+                    if screen.__dict__ == self.__dict__:
+                        screens.remove(screen)
+                        for time,film in screen.shows.items():
+                            if time.__dict__==timeslot.dict and film.__dict__==movie.__dict__:
+                                screen.shows.pop(time)    
+        screens.append(screen)
+        save_screens(screens)
 
     def add_screen(self):
         while True:
@@ -183,21 +218,31 @@ class Admin(User):
             no_seats = int(input("Enter number of seats: "))
             seats = [str(i) for i in range(0,no_seats)]
             new_screen = Screen(screen_id,seats)
-            screens.append(new_screen)
-            save_screens(screens)  
-            print("screen addition successful")
             break
+        screens.append(new_screen)
+        save_screens(screens)  
+        print("screen addition successful")
+            
 
     def remove_screen(self):
-        pass
+        screens=load_screens()
+        screen_id=input("enter screen id: ")
+        for screen in screens:
+            if screen.screen_id==screen_id:
+                screens.remove(screen)
+        save_screens(screens)
 class Movie:
     def __init__(self,title):
         self.title=title
+    def __repr__(self):
+        return str(self.__dict__)
 class Timeslot:
     def __init__(self,starting_time,ending_time,date):
         self.starting_time=starting_time
         self.ending_time=ending_time
         self.date=date
+    def __repr__(self):
+        return str(self.__dict__)
 class Screen:
     def __init__(self,screen_id,seats):
         self.screen_id=screen_id 
@@ -219,40 +264,44 @@ class Booking:
         if isinstance(other,Booking):
             return self.screen_id==other.screen_id and self.movie_title==other.movie_title and self.seat_id==other.seat_id and self.starting_time==other.starting_time and self.date==other.date
         
-    def display_booking(self):
-        print("booking id: ",self.booking_id)
-        print("screen id: ",self.screen_id)
-        print("movie title: ",self.movie_title)
-        print("seat id: ",self.seat_id )
-        print("starting time: ",self.starting_time)
-        print("date: ", self.date)
 
 def admin_menu(admin):
     while True:
         print("Admin Menu:")
         print("1 - Display Screens")
-        print("2 - Add Show")
-        print("3 - Add Screen")
-        print("4 - Logout")
+        print("2 - Display Shows")
+        print("3 - Add Show")
+        print("4 - Add Screen")
+        print("5 - Remove Show")
+        print("6 - Remvoe Screen")
+        print("7 - Logout")
         choice = input("Enter your choice: ")
         if choice == "1":
             admin.display_screens()
         elif choice == "2":
-            admin.add_show()
+            admin.display_shows()
         elif choice == "3":
-            admin.add_screen()
+            admin.add_show()
         elif choice == "4":
+            admin.add_screen()
+        elif choice == "5":
+            admin.remove_show()
+        elif choice == "6":
+            admin.remove_screen()
+        elif choice == "7":
             print("Logging out as admin")
             break
         else:
             print("Invalid choice. Please try again.")
+
 def user_menu(user):
     while True:
         print("User Menu:")
         print("1 - Display Shows")
         print("2 - Book Show")
         print("3 - Display Bookings")
-        print("4 - Logout")
+        print("4 - Cancel Booking")
+        print("5 - Logout")
         choice = input("Enter your choice: ")
         if choice == "1":
             user.display_shows()
@@ -261,6 +310,8 @@ def user_menu(user):
         elif choice == "3":
             user.display_booking()
         elif choice == "4":
+            user.remove_booking()
+        elif choice == "5":
             print("Logging out as user")
             break
         else:
